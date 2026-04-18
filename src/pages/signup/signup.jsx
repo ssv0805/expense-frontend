@@ -8,6 +8,7 @@ import { Link, useNavigate } from "react-router-dom"
 import myImage from '../../assets/images/login3.png';
 
 const Signup = () => {
+    const API_URL = "https://expense-backend-porh.onrender.com"
     let regex = /^[a-zA-Z0-9]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/;
     let pattern = /^[a-zA-Z ]+$/;
     const [showPassword, setShowPassword] = useState(false);

@@ -6,6 +6,7 @@ import { addTransaction, setTransactions, deleteTransaction } from "../../featur
 import "./expense.css";
 
 function Expense() {
+    const API_URL = "https://expense-backend-porh.onrender.com"
     //const sessionId = localStorage.getItem("sessionId");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(7);

@@ -10,6 +10,7 @@ import "../Expense/expense.css"
 
 
 function Income() {
+    const API_URL = "https://expense-backend-porh.onrender.com"
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemPerPage] = useState(7);

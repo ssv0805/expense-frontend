@@ -8,6 +8,7 @@ import FilterDrawer from "../../components/Drawer";
 import UploadFeature from "../../components/UploadFeature";
 
 function TransactionPage() {
+    const API_URL = "https://expense-backend-porh.onrender.com"
     //const sessionId = localStorage.getItem("sessionId");
     const dispatch = useDispatch();
     const navigate = useNavigate();

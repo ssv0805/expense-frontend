@@ -2,6 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 
 function Appp() {
+  const API_URL = "https://expense-backend-porh.onrender.com"
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -71,7 +72,7 @@ function Appp() {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/upload",
+        `${API_URL}/upload`,
         formData,
         {
           headers: {
