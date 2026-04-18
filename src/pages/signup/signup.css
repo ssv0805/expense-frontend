@@ -1,0 +1,166 @@
+.login-page {
+    height: 100vh;
+    display: flex;
+    background: rgb(255, 255, 255);
+    font-family: sans-serif;
+}
+
+.left-section {
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.left-section h1 {
+    color: #3B1347;
+    margin-bottom: 25px;
+}
+
+.right-section {
+    width: 60%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(135deg, #F4D1FF, #FFFFFF);
+    overflow: hidden;
+}
+
+.right-section img {
+    width: 100%;
+    height: 100%;
+
+}
+
+.container {
+    width: 400px;
+    background: #FFFFFF;
+    padding: 40px;
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    border: 1px solid #DBDBDB;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.text {
+    font-size: 28px;
+    font-weight: 600;
+    color: #3B1347;
+}
+
+.underline {
+    width: 60px;
+    height: 4px;
+    background: #3B1347;
+    margin: 8px auto;
+    border-radius: 10px;
+}
+
+.inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.inputs label {
+    font-size: 14px;
+    margin-top: 10px;
+    color: #3B1347;
+    font-weight: 500;
+}
+
+.input {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+.toggle-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+}
+.input input {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #DBDBDB;
+    outline: none;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.input input:focus {
+    border-color: #3B1347;
+    box-shadow: 0 0 0 2px #F4D1FF;
+}
+
+.error {
+    font-size: 12px;
+    color: red;
+    margin-top: 4px;
+}
+
+.submit-container {
+    margin-top: 20px;
+}
+
+.submit {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: #3B1347;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.submit:hover {
+    background: #4d1a59;
+}
+
+.container p {
+    margin-top: 15px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.container a {
+    color: #3B1347;
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 5px;
+}
+
+.container a:hover {
+    text-decoration: underline;
+}
+
+.forgot-password {
+    text-align: center;
+    color: #3B1347;
+}
+
+.asterisk{
+    color:red;
+}
+
+p {
+    
+    color: #4d1a59;
+
+}
+
+.abc{
+    margin-top: 25px;
+}

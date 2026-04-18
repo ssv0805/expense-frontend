@@ -1,0 +1,51 @@
+/* For tablets / half screen */
+@media (max-width: 1024px) {
+  .container {
+    width: 100% !important;
+    padding: 15px !important;
+  }
+}
+
+/* For smaller laptop / half screen */
+@media (max-width: 768px) {
+  .main-layout {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .sidebar {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .content {
+    width: 100% !important;
+  }
+
+  .cards {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 15px !important;
+  }
+
+  .card {
+    width: 100% !important;
+  }
+
+  .table-container {
+    overflow-x: auto !important;
+  }
+}
+
+/* For mobile */
+@media (max-width: 480px) {
+  .card {
+    padding: 12px !important;
+  }
+
+  .form-input,
+  .form-select,
+  .form-button {
+    width: 100% !important;
+  }
+}
