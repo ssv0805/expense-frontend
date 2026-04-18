@@ -26,7 +26,7 @@ const app = express();
 connect();
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://bespoke-panda-47496f.netlify.app"
+  "https://roaring-banoffee-a43e28.netlify.app/"
 ];
 
 app.use(cors({
@@ -270,8 +270,8 @@ app.post("/login", async (req, res) => {
         //res.cookie(name, value [, options])
         res.cookie("sessionId", sessionId, {
             httpOnly: true,
-            secure: false,
-            sameSite: "lax"
+            secure: true,
+            sameSite: "none"
         });
 
         return res.status(200).json({
@@ -337,8 +337,8 @@ app.post("/logout", async (req, res) => {
 
     res.clearCookie("sessionId", {
         httpOnly: true,
-        secure: false,
-        sameSite: "lax"
+        secure: true,
+        sameSite: "none"
     });
 
     return res.status(200).json({
@@ -393,5 +393,5 @@ cron.schedule("*/5 * * * * *", async () => {
 const PORT = process.env.PORT || 8080;
 
 app.listen(PORT, () => {
-  console.log("Server running");
+  console.log(`Server running on port ${PORT}`);
 });
