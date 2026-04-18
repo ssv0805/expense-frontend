@@ -45,7 +45,7 @@ function UploadFeature() {
 
     try {
       const res = await axios.post(
-        "http://localhost:8080/upload",
+       `${API_URL}/upload,
         formData,
         { withCredentials: true }
       );
