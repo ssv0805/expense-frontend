@@ -331,7 +331,7 @@ app.post("/signup", async (req, res) => {
 app.post("/logout", async (req, res) => {
     const sessionId = req.cookies.sessionId;
 
-    if (sessionId && sessions[sessionId]) {
+    if (sessionId ) {
         await Session.deleteOne({ sessionId });
     }
 
