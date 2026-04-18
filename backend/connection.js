@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const connect = async () => {
     try {
-        await mongoose.connect("mongodb://localhost:27017/expense-tracker");
+        await mongoose.connect(process.env.MONGO_URI);
         console.log("MongoDB connected");
     } catch (err) {
         console.log("Failed to connect", err);
