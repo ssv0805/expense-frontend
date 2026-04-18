@@ -23,20 +23,15 @@ let isRunning = false;
 
 const app = express();
 
-connect();
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://roaring-banoffee-a43e28.netlify.app"
-];
-
+connect()
+  .then(() => {
+    console.log("MongoDB connected");
+  })
+  .catch((err) => {
+    console.error("MongoDB error:", err);
+  });
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: "https://roaring-banoffee-a43e28.netlify.app",
   credentials: true
 }));
 
