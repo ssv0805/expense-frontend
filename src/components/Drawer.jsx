@@ -12,7 +12,9 @@ function FilterDrawer({
   setTempSearch,
   categories,
   onApply,
-  onReset
+  onReset,
+
+  showType = true
 }) {
   return (
     <>
@@ -30,11 +32,13 @@ function FilterDrawer({
 
         <div className="drawer-content">
 
-          <select value={tempType} onChange={(e) => setTempType(e.target.value)}>
-            <option value="">All Types</option>
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
-          </select>
+          {showType && (
+            <select value={tempType} onChange={(e) => setTempType(e.target.value)}>
+              <option value="">All Types</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          )}
 
           <select value={tempCategory} onChange={(e) => setTempCategory(e.target.value)}>
             <option value="">All Categories</option>

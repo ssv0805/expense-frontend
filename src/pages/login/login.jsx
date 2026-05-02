@@ -7,7 +7,10 @@ import { Link, useNavigate } from "react-router-dom";
 import myImage from '../../assets/images/login3.png';
 
 const Login = () => {
-  const API_URL = "https://expense-backend-porh.onrender.com"
+  const API_URL =
+  window.location.hostname === "localhost"
+    ? "http://localhost:5000"
+    : "https://expense-backend-porh.onrender.com";
   
   const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
@@ -73,7 +76,7 @@ const Login = () => {
   return (
     <div className="login-page">
       <div className="left-section">
-        <h1>Expense Tracker</h1>
+        <h1>Trackify</h1>
 
         <form onSubmit={handleSubmit}>
           <div className="container">

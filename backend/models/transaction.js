@@ -19,12 +19,20 @@ const transactionSchema = new mongoose.Schema({
         required: true
     },
     payment: String,   
-    source: String,   
+    source:{
+        type:String, 
+        
+    }, 
     to: String,       
     user: {
         type: String,
         required: true
-    }
+    },
+    billId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Bill",
+    default: null
+},
 }, { timestamps: true });
 
 module.exports = mongoose.model("Transaction", transactionSchema);

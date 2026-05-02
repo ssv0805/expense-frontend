@@ -4,15 +4,41 @@ import Chart from "../../components/chart";
 import Transactions from "../../components/Transactions";
 import Budget from "../../components/Budget";
 import Bills from "../../components/Bills";
-import { useSelector } from "react-redux";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
+import axios from "axios";
+import { setTransactions } from "../../features/transaction/transactionSlice";
 import "./dashboard.css";
 
 function Dashboard() {
   const dispatch = useDispatch();
-  const currentUser = useSelector((state) => state.user.currentUser)||{};
 
-  const transactions = useSelector((state) => state.transaction )|| [];
+  const currentUser = useSelector((state) => state.user.currentUser);
+  const transactions = useSelector((state) => state.transaction.all || []);
+
+  const API_URL =
+    window.location.hostname === "localhost"
+      ? "http://localhost:5000"
+      : "https://expense-backend-porh.onrender.com";
+
+  // ✅ FETCH ALL TRANSACTIONS FOR DASHBOARD
+  useEffect(() => {
+    if (!currentUser?.email) return;
+
+    const fetchAll = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/transaction/all`, {
+          withCredentials: true,
+        });
+
+        dispatch(setTransactions({ all: res.data }));
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    fetchAll();
+  }, [currentUser, dispatch]);
 
   const expenses = transactions.filter(
     (t) => t.user === currentUser?.email && t.type === "expense"
@@ -29,74 +55,38 @@ function Dashboard() {
   const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
   const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
 
-  // Current month income
   const currentMonthIncome = incomes.filter((inc) => {
     const date = new Date(inc.date);
-    return (
-      date.getMonth() === currentMonth &&
-      date.getFullYear() === currentYear
-    );
+    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
   });
-  
 
-  // Current month expense
   const currentMonthExpense = expenses.filter((exp) => {
     const date = new Date(exp.date);
-    return (
-      date.getMonth() === currentMonth &&
-      date.getFullYear() === currentYear
-    );
+    return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
   });
 
-  // Previous month income
   const previousMonthIncome = incomes.filter((inc) => {
     const date = new Date(inc.date);
-    return (
-      date.getMonth() === previousMonth &&
-      date.getFullYear() === previousYear
-    );
+    return date.getMonth() === previousMonth && date.getFullYear() === previousYear;
   });
 
-  // Previous month expense
   const previousMonthExpense = expenses.filter((exp) => {
     const date = new Date(exp.date);
-    return (
-      date.getMonth() === previousMonth &&
-      date.getFullYear() === previousYear
-    );
+    return date.getMonth() === previousMonth && date.getFullYear() === previousYear;
   });
 
-  // Totals
-  const totalIncome = currentMonthIncome.reduce(
-    (sum, inc) => sum + Number(inc.amount),
-    0
-  );
+  const totalIncome = currentMonthIncome.reduce((s, i) => s + Number(i.amount), 0);
+  const totalExpense = currentMonthExpense.reduce((s, e) => s + Number(e.amount), 0);
 
-  const totalExpense = currentMonthExpense.reduce(
-    (sum, exp) => sum + Number(exp.amount),
-    0
-  );
-
-  const prevIncome = previousMonthIncome.reduce(
-    (sum, inc) => sum + Number(inc.amount),
-    0
-  );
-
-  const prevExpense = previousMonthExpense.reduce(
-    (sum, exp) => sum + Number(exp.amount),
-    0
-  );
+  const prevIncome = previousMonthIncome.reduce((s, i) => s + Number(i.amount), 0);
+  const prevExpense = previousMonthExpense.reduce((s, e) => s + Number(e.amount), 0);
 
   const balance = totalIncome - totalExpense;
   const prevBalance = prevIncome - prevExpense;
   const savings = balance;
 
-  // Percentage change helper
   const calculateChange = (current, previous) => {
-    if (previous === 0) {
-      if (current === 0) return 0;
-      return 100;
-    }
+    if (previous === 0) return current === 0 ? 0 : 100;
     return (((current - previous) / previous) * 100).toFixed(1);
   };
 
@@ -107,11 +97,20 @@ function Dashboard() {
   const savingsPercent =
     totalIncome === 0 ? 0 : ((savings / totalIncome) * 100).toFixed(1);
 
+  const formatFullName = (name) => {
+    if (!name) return "User";
+    return name
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(" ");
+  };
+
   return (
-    <div className="content">
+    <>
       <div className="dashboard-header">
-        <h2>Welcome, {currentUser?.name || "User"}</h2>
+        <h2>Welcome, {formatFullName(currentUser?.name)}</h2>
       </div>
+
       <Card
         balance={balance}
         income={totalIncome}
@@ -133,7 +132,7 @@ function Dashboard() {
         <Budget />
         <Bills />
       </div>
-    </div>
+    </>
   );
 }
 

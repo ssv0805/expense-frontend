@@ -6,10 +6,13 @@ import Login from "./pages/login/login"
 import Dashboard from "./pages/Dashboard/dashboard"
 import Expense from "./pages/Expense/expense"
 import Income from "./pages/income/income"
+import Budget from "./pages/Budget/budget"
+import Bills from "./pages/Bills/bills"
 import Transaction from "./pages/Transactions/transaction"
 import Appp from "./pages/file/file"
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
+
 import axios from "axios";
 
 
@@ -51,10 +54,14 @@ function App() {
           <Route path="/transaction"
           element={<ProtectedRoute>
             <Transaction />
-          </ProtectedRoute>} />
-          <Route path="/file"
+         </ProtectedRoute>} />
+          <Route path="/budget"
           element={<ProtectedRoute>
-            <Appp />
+            <Budget />
+          </ProtectedRoute>} />
+          <Route path="/bill"
+          element={<ProtectedRoute>
+            <Bills />
           </ProtectedRoute>} />
       </Route>
 

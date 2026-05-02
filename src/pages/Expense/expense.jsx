@@ -2,43 +2,46 @@ import { useState, useEffect } from "react";
 import axios from "axios"
 import { useDispatch, useSelector } from "react-redux";
 import { addTransaction, setTransactions, deleteTransaction } from "../../features/transaction/transactionSlice"
-//import { addExpense, deleteExpense } from "../../features/expense/expenseSlice";
 import "./expense.css";
+import Pagination from "../../components/Pagination";
+import FilterDrawer from "../../components/Drawer";
 
 function Expense() {
-    const API_URL = "https://expense-backend-porh.onrender.com"
-    //const sessionId = localStorage.getItem("sessionId");
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(7);
+    const API_URL =
+        window.location.hostname === "localhost"
+            ? "http://localhost:5000"
+            : "https://expense-backend-porh.onrender.com";
+
+    const [editId, setEditId] = useState(null);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [allCategories, setAllCategories] = useState([]);
+    const [unpaidBills, setUnpaidBills] = useState([]);
+    const [selectedBillId, setSelectedBillId] = useState("");
+
+    const [drawerOpen, setDrawerOpen] = useState(false);
+    const [tempCategory, setTempCategory] = useState("");
+    const [tempMonth, setTempMonth] = useState("");
+    const [tempType, setTempType] = useState("");
+    const [tempSearch, setTempSearch] = useState("");
+
+    const [search, setSearch] = useState("");
+    const [limit, setLimit] = useState(7);
+    const [total, setTotal] = useState(0);
 
     const dispatch = useDispatch();
     const currentUser = useSelector((state) => state.user.currentUser);
-
-    //const expenses = useSelector((state) => state.expense).filter(
-    // (exp) => exp.user === currentUser?.email
-    //);
     const transactions = useSelector((state) => state.transaction);
+    const expenses = Array.isArray(transactions) ? transactions : [];
 
-    const expenses = transactions.filter(
-        (t) => t.user === currentUser?.email && t.type === "expense"
-    );
-
-    const predefinedPayments = [
-        "Cash",
-        "UPI",
-        "Card",
-        "Bank"
-    ];
-
+    const predefinedPayments = ["Cash", "UPI", "Card", "Bank"];
 
     const dynamicPayments = expenses
         .map((exp) => exp.payment?.trim())
         .filter(Boolean)
         .map(p => p.charAt(0).toUpperCase() + p.slice(1).toLowerCase());
 
-    const payments = [
-        ...new Set([...predefinedPayments, ...dynamicPayments])
-    ];
+    const payments = [...new Set([...predefinedPayments, ...dynamicPayments])];
 
     const predefinedCategories = [
         "Food",
@@ -49,13 +52,7 @@ function Expense() {
         "Other",
     ];
 
-    const dynamicCategories = expenses
-        .map((exp) => exp.category?.trim())
-        .filter(Boolean);
-
-    const categories = [
-        ...new Set([...predefinedCategories, ...dynamicCategories])
-    ];
+    const categories = [...new Set([...predefinedCategories, ...allCategories])];
 
     const [showForm, setShowForm] = useState(false);
 
@@ -70,6 +67,26 @@ function Expense() {
     const [categoryFilter, setCategoryFilter] = useState("");
     const [monthFilter, setMonthFilter] = useState("");
 
+    // ✅ FETCH CATEGORIES
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await axios.get(
+                    `${API_URL}/transaction/categories`,
+                    {
+                        withCredentials: true,
+                        params: { type: "expense" }
+                    }
+                );
+                setAllCategories(res.data);
+            } catch (err) {
+                console.log(err);
+            }
+        };
+        fetchCategories();
+    }, []);
+
+    // ✅ FETCH TRANSACTIONS
     useEffect(() => {
         const fetchTransactions = async () => {
             try {
@@ -79,312 +96,385 @@ function Expense() {
                     `${API_URL}/transaction`,
                     {
                         withCredentials: true,
+                        params: {
+                            page,
+                            limit,
+                            category: categoryFilter,
+                            type: "expense",
+                            month: monthFilter
+                        },
                     }
                 );
 
-                //console.log("EXPENSE PAGE FETCH:", resp.data);
-                dispatch(setTransactions(resp.data));
+                dispatch(setTransactions(resp.data.data));
+                setTotalPages(resp.data.totalPages);
+                setTotal(resp.data.total);
             } catch (err) {
                 console.log("EXPENSE FETCH ERROR:", err.response?.data || err.message);
             }
         };
 
         fetchTransactions();
-    }, [currentUser, dispatch]);
+    }, [currentUser, page, categoryFilter, limit, monthFilter, dispatch]);
 
+    // ✅ FETCH BILLS (REUSABLE)
+    const fetchBills = async () => {
+        try {
+            const res = await axios.get(
+                `${API_URL}/api/bills`,
+                { withCredentials: true }
+            );
 
+            const unpaid = res.data.filter(
+                bill => bill.status === "unpaid"
+            );
+
+            setUnpaidBills(unpaid);
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    useEffect(() => {
+        fetchBills();
+    }, []);
+
+    // ✅ HANDLE CHANGE
     const handleChange = (e) => {
         const { name, value } = e.target;
 
+        // reset bill if category changes
+        if (name === "category" && value !== "Bills") {
+            setSelectedBillId("");
+        }
+
         if (name === "amount") {
             const cleanedValue = value.replace(/^0+(?=\d)/, "");
-
             setForm({ ...form, [name]: cleanedValue });
         } else {
             setForm({ ...form, [name]: value });
         }
     };
 
+    // ✅ DELETE
     const handleDelete = async (id) => {
         try {
-            await axios.delete(`${API_URL}/transaction/${id}`,
-                {
-                    withCredentials: true
+            await axios.delete(`${API_URL}/transaction/${id}`, {
+                withCredentials: true
+            });
 
-                }
-            )
-
-            dispatch(deleteTransaction(id))
-        }
-        catch (err) {
+            dispatch(deleteTransaction(id));
+        } catch (err) {
             console.log(err);
-            alert("Deletion failed")
+            alert("Deletion failed");
         }
-    }
+    };
 
+    // ✅ SUBMIT
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        //const selectedDate = new Date(form.date);
-        //const today = new Date();
-        //today.setHours(0, 0, 0, 0);
 
         if (form.date > new Date().toISOString().split("T")[0]) {
             alert("Future dates are not allowed!");
             return;
         }
+
         if (!form.amount || Number(form.amount) <= 0) {
             alert("Enter a valid amount!");
             return;
         }
 
         try {
-            
-            const res = await axios.post(`${API_URL}/transaction`, {
-                ...form,
-                category: form.category,
-                type: "expense",
-                //user: currentUser?.email
-            },
-                {
-                    withCredentials: true
-                })
+            let res;
 
-            dispatch(
-                addTransaction(res.data)
-            );
+            if (editId) {
+                res = await axios.put(
+                    `${API_URL}/transaction/${editId}`,
+                    {
+                        ...form,
+                        type: "expense",
+                        billId: selectedBillId || null
+                    },
+                    { withCredentials: true }
+                );
 
+                dispatch(setTransactions(
+                    transactions.map(t => t._id === editId ? res.data : t)
+                ));
+
+                alert("Expense updated successfully ✅");
+            } else {
+                res = await axios.post(
+                    `${API_URL}/transaction`,
+                    {
+                        ...form,
+                        type: "expense",
+                        billId: selectedBillId || null
+                    },
+                    { withCredentials: true }
+                );
+
+                dispatch(addTransaction(res.data));
+                alert("Expense added successfully!");
+            }
+
+            // ✅ RESET
             setForm({
-                date: "",
+                date: new Date().toISOString().split("T")[0],
                 category: "",
                 amount: "",
                 payment: "",
                 to: "",
             });
 
+            setEditId(null);
+            setSelectedBillId(""); // ✅ IMPORTANT
             setShowForm(false);
+
+            await fetchBills(); // ✅ refresh bills
+
+        } catch (err) {
+            alert(err.response?.data?.message || "Something went wrong");
         }
-        catch (err) {
-            console.log(err)
-            alert("Error saving Expense!")
-        }
-    }
-
-    const filteredExpenses = expenses.filter((exp) => {
-        const month = new Date(exp.date).getMonth() + 1;
-
-        const monthMatch = monthFilter
-            ? month === Number(monthFilter)
-            : true;
-
-        const categoryMatch = categoryFilter
-            ? (exp.category || "").toLowerCase() === categoryFilter.toLowerCase()
-            : true;
-
-        return monthMatch && categoryMatch;
-    });
+    };
 
     const formatDate = (date) =>
         new Date(date).toLocaleDateString("en-GB").replace(/\//g, "-");
 
-    function renderPaginationControls() {
-        return (
-            <div className="pagination">
-                <button
-                    onClick={() => setCurrentPage((prev) => prev - 1)}
-                    disabled={currentPage === 1}
-                >
-                    Previous
-                </button>
-
-                {Array.from({ length: totalPages }, (_, i) => (
-                    <button
-                        key={i}
-                        className={currentPage === i + 1 ? "active-page" : ""}
-                        onClick={() => setCurrentPage(i + 1)}
-                    >
-                        {i + 1}
-                    </button>
-                ))}
-
-                <button
-                    onClick={() => setCurrentPage((prev) => prev + 1)}
-                    disabled={currentPage === totalPages}
-                >
-                    Next
-                </button>
-            </div>
-        );
-    }
-
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-
-    const paginatedExpenses = filteredExpenses.slice(startIndex, endIndex);
-
-    const totalPages = Math.ceil(filteredExpenses.length / itemsPerPage);
     return (
-        <div className="expense-page">
-            <h2 className="expense-title">Expense Management</h2>
+        <>
+            <div className="expense-page">
+                <div className="def">
+                    <h2 className="expense-title">Expense Management</h2>
 
-            {/* FILTERS */}
-            <div className="filters">
-                <select onChange={(e) => setCategoryFilter(e.target.value)}>
-                    <option value="">All Categories</option>
-                    {categories.map((cat, index) => (
-                        <option key={index} value={cat}>{cat}</option>
-                    ))}
-                </select>
+                    <div className="filters">
+                        <button onClick={() => setDrawerOpen(true)} className="filter-toggle">
+                            ☰ Filters
+                        </button>
 
-                <select onChange={(e) => setMonthFilter(e.target.value)}>
-                    <option value="">All Months</option>
-                    <option value="1">January</option>
-                    <option value="2">February</option>
-                    <option value="3">March</option>
-                    <option value="4">April</option>
-                    <option value="5">May</option>
-                    <option value="6">June</option>
-                    <option value="7">July</option>
-                    <option value="8">August</option>
-                    <option value="9">September</option>
-                    <option value="10">October</option>
-                    <option value="11">November</option>
-                    <option value="12">December</option>
-                </select>
+                        <button onClick={() => setShowForm(true)} className="add-btn">
+                            + Add Expense
+                        </button>
+                    </div>
+                </div>
 
-                <button onClick={() => setShowForm(true)} className="add-btn">
-                    + Add Expense
-                </button>
-            </div>
+                <FilterDrawer
+                    drawerOpen={drawerOpen}
+                    setDrawerOpen={setDrawerOpen}
+                    tempType={tempType}
+                    setTempType={setTempType}
+                    tempCategory={tempCategory}
+                    setTempCategory={setTempCategory}
+                    tempMonth={tempMonth}
+                    setTempMonth={setTempMonth}
+                    tempSearch={tempSearch}
+                    setTempSearch={setTempSearch}
+                    categories={categories}
+                    onApply={() => {
+                        setCategoryFilter(tempCategory);
+                        setMonthFilter(tempMonth);
+                        setSearch(tempSearch);
+                        setDrawerOpen(false);
+                        setPage(1);
+                    }}
+                    onReset={() => {
+                        setTempCategory("");
+                        setTempMonth("");
+                        setTempSearch("");
+                        setCategoryFilter("");
+                        setMonthFilter("");
+                        setSearch("");
+                    }}
+                    showType={false}
+                />
 
-            {/* TABLE */}
-            <div className="expense-table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Category</th>
-                            <th>Amount</th>
-                            <th>Payment</th>
-                            <th>To</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
+                <div className="expense-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Amount</th>
+                                <th>Payment</th>
+                                <th>To</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
 
-                    <tbody>
-                        {paginatedExpenses.map((exp) => (
-                            <tr key={exp._id}>
-                                <td>{formatDate(exp.date)}</td>
-                                <td>{exp.category}</td>
-                                <td style={{ color: "red" }}>Rs.{exp.amount}</td>
-                                <td>{exp.payment}</td>
-                                <td>{exp.to}</td>
+                        <tbody>
+                            {expenses.length > 0 ? (
+                                expenses.map((exp) => (
+                                    <tr key={exp._id}>
+                                        <td>{formatDate(exp.date)}</td>
+                                        <td>{exp.category}</td>
+                                        <td style={{ color: "red" }}>Rs.{exp.amount}</td>
+                                        <td>{exp.payment}</td>
+                                        <td>{exp.to}</td>
 
-                                <td>
-                                    <button
-                                        className="delete-btn"
-                                        onClick={() => {
-                                            if (window.confirm("Delete this expense?")) {
-                                                handleDelete(exp._id)
-                                                //dispatch(deleteExpense(exp._id));
-                                                setTimeout(() => {
-                                                    alert("Expense deleted successfully ✅");
-                                                }, 300);
+                                        <td>
+                                            <button
+                                                className="edit-btn"
+                                                onClick={() => {
+                                                    setForm({
+                                                        date: exp.date.split("T")[0],
+                                                        category: exp.category,
+                                                        amount: exp.amount,
+                                                        payment: exp.payment,
+                                                        to: exp.to,
+                                                    });
 
+                                                    if (exp.billId) {
+                                                        setSelectedBillId(exp.billId._id || exp.billId);
+                                                    } else {
+                                                        setSelectedBillId("");
+                                                    }
+
+                                                    setEditId(exp._id);
+                                                    setShowForm(true);
+                                                }}
+                                            >
+                                                Edit
+                                            </button>
+
+                                            <button
+                                                className="del-btn"
+                                                onClick={() => {
+                                                    if (window.confirm("Delete this expense?")) {
+                                                        handleDelete(exp._id);
+                                                    }
+                                                }}
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="6" style={{ textAlign: "center" }}>
+                                        No expense records found
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {showForm && (
+                    <div className="modal-overlay" onClick={() => setShowForm(false)}>
+                        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                            <h3>Add Expense</h3>
+
+                            <form onSubmit={handleSubmit} className="expense-form">
+
+                                <input
+                                    type="date"
+                                    name="date"
+                                    max={new Date().toISOString().split("T")[0]}
+                                    value={form.date}
+                                    onChange={handleChange}
+                                    required
+                                />
+
+                                <select
+                                    name="category"
+                                    value={form.category}
+                                    onChange={handleChange}
+                                    required
+                                    disabled={!!selectedBillId}
+                                >
+                                    <option value="">Select Category</option>
+                                    {categories.map((cat, index) => (
+                                        <option key={index} value={cat}>{cat}</option>
+                                    ))}
+                                </select>
+
+                                <input
+                                    type="number"
+                                    name="amount"
+                                    placeholder="Amount"
+                                    value={form.amount}
+                                    onChange={handleChange}
+                                    disabled={!!selectedBillId}
+                                />
+
+                                <select
+                                    name="payment"
+                                    value={form.payment}
+                                    onChange={handleChange}
+                                    disabled={!!selectedBillId}
+                                >
+                                    <option value="">Payment Method</option>
+                                    {payments.map((pay, index) => (
+                                        <option key={index} value={pay}>{pay}</option>
+                                    ))}
+                                </select>
+
+                                {form.category === "Bills" && (
+                                    <select
+                                        value={selectedBillId}
+                                        onChange={(e) => {
+                                            const billId = e.target.value;
+                                            setSelectedBillId(billId);
+
+                                            const selectedBill = unpaidBills.find(
+                                                bill => bill._id === billId
+                                            );
+
+                                            if (selectedBill) {
+                                                setForm({
+                                                    ...form,
+                                                    to: selectedBill.name,
+                                                    amount: selectedBill.amount,
+                                                    payment: selectedBill.paymentMethod
+                                                });
                                             }
                                         }}
                                     >
-                                        Delete
+                                        <option value="">Select Bill</option>
+                                        {unpaidBills.map((bill) => (
+                                            <option key={bill._id} value={bill._id}>
+                                                {bill.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                )}
+
+                                <input
+                                    type="text"
+                                    name="to"
+                                    placeholder="Payment to / Bill name"
+                                    value={form.to}
+                                    onChange={handleChange}
+                                    disabled={!!selectedBillId}
+                                />
+
+                                <div className="modal-buttons">
+                                    <button type="submit">Save</button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowForm(false)}
+                                        className="cancel-btn"
+                                    >
+                                        Cancel
                                     </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                                </div>
+
+                            </form>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {renderPaginationControls()}
-
-            {showForm && (
-                <div className="modal-overlay" onClick={() => setShowForm(false)}>
-
-                    <div
-                        className="modal-content"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <h3>Add Expense</h3>
-
-                        <form onSubmit={handleSubmit} className="expense-form">
-
-                            <input
-                                type="date"
-                                name="date"
-                                max={new Date().toISOString().split("T")[0]}
-                                value={form.date}
-                                onChange={handleChange}
-                                required
-                            />
-
-                            <select
-                                name="category"
-                                value={form.category}
-                                onChange={handleChange}
-                                required
-                            >
-                                <option value="">Select Category</option>
-                                {categories.map((cat, index) => (
-                                    <option key={index} value={cat}>{cat}</option>
-                                ))}
-                            </select>
-
-                            <input
-                                type="number"
-                                name="amount"
-                                placeholder="Amount"
-                                value={form.amount}
-                                onChange={handleChange}
-
-
-                            />
-
-                            <select
-                                name="payment"
-                                value={form.payment}
-                                onChange={handleChange}
-                            >
-                                <option value="">Payment Method</option>
-                                {payments.map((pay, index) => (
-                                    <option key={index} value={pay}>
-                                        {pay}
-                                    </option>
-                                ))}
-                            </select>
-
-                            <input
-                                type="text"
-                                name="to"
-                                placeholder="To Whom"
-                                value={form.to}
-                                onChange={handleChange}
-                            />
-
-                            <div className="modal-buttons">
-                                <button type="submit">Save</button>
-
-                                <button
-                                    type="button"
-                                    onClick={() => setShowForm(false)}
-                                    className="cancel-btn"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-
-                        </form>
-                    </div>
-                </div>
-            )}
-        </div>
+            <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                limit={limit}
+                setLimit={setLimit}
+                total={total}
+            />
+        </>
     );
 }
 

@@ -2,7 +2,10 @@ import { useState } from "react";
 import axios from "axios";
 
 function UploadFeature() {
-  const API_URL = "https://expense-backend-porh.onrender.com"
+const API_URL =
+    window.location.hostname === "localhost"
+      ? "http://localhost:5000"
+      : "https://expense-backend-porh.onrender.com";
   const [open, setOpen] = useState(false);
   const [file, setFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
@@ -46,7 +49,7 @@ function UploadFeature() {
 
     try {
       const res = await axios.post(
-       `${API_URL}/upload`,
+        `${API_URL}/upload`,
         formData,
         { withCredentials: true }
       );
@@ -80,7 +83,7 @@ function UploadFeature() {
         className="add-btn"
         onClick={() => setOpen(true)}
       >
-        Upload
+        Import File
       </button>
 
       {/* OVERLAY */}

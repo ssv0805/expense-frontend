@@ -164,3 +164,46 @@ p {
 .abc{
     margin-top: 25px;
 }
+
+
+
+
+@media (max-width: 768px) {
+
+  /* Full white screen + perfect centering */
+  .login-page {
+    display: flex;              /* 🔥 important */
+    justify-content: center;    /* horizontal center */
+    align-items: center;        /* vertical center */
+    height: 100vh;
+    background: #ffffff;
+  }
+
+  /* Hide image */
+  .right-section {
+    display: none;
+  }
+
+  /* Remove layout constraints */
+  .left-section {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* Center form */
+  .container {
+    width: 90%;
+    max-width: 350px;
+    padding: 25px;
+    border-radius: 12px;
+  }
+
+  /* Optional: center heading */
+  .left-section h1 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+}

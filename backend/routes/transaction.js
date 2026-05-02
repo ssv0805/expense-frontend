@@ -5,12 +5,20 @@ const auth =require ("../middleware/auth")
 const {
     addTransaction,
     getTransactions,
-    deleteTransaction
+    deleteTransaction,
+    updateTransaction,
+    exportTransactions,
+    getAllTransactions,
+    getCategories
 } = require("../controllers/transaction");
 
 // routes
 router.post("/",auth, addTransaction);
 router.get("/",auth, getTransactions);
+router.get("/categories", auth, getCategories);
 router.delete("/:id", auth, deleteTransaction);
+router.put("/:id",auth, updateTransaction);
+router.get("/export", auth, exportTransactions);
+router.get("/all",auth, getAllTransactions);
 
 module.exports = router;  

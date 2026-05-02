@@ -6,15 +6,23 @@ import { useState, useMemo } from "react";
 import { setTransactions } from "../../features/transaction/transactionSlice"
 import FilterDrawer from "../../components/Drawer";
 import UploadFeature from "../../components/UploadFeature";
+import Pagination from "../../components/Pagination";
 
 function TransactionPage() {
-    const API_URL = "https://expense-backend-porh.onrender.com"
+    const API_URL =
+        window.location.hostname === "localhost"
+            ? "http://localhost:5000"
+            : "https://expense-backend-porh.onrender.com";
     //const sessionId = localStorage.getItem("sessionId");
     const dispatch = useDispatch();
     const navigate = useNavigate();
     //PAGINATION
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemPerPage] = useState(8);
+    const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(7);
+    const [allCategories, setAllCategories] = useState([]);
+
+    const [totalPages, setTotalPages] = useState(1);
+    const [total, setTotal] = useState(0);
     //FILTERS
     const [categoryFilter, setCategoryFilter] = useState("");
     const [monthFilter, setMonthFilter] = useState("");
@@ -30,8 +38,10 @@ function TransactionPage() {
     const currentUser = useSelector((state) => state.user.currentUser);
     //const incomesData = useSelector((state) => state.income || []);
     //const expensesData = useSelector((state) => state.expense || []);
-    const transactions = useSelector((state) => state.transaction);
-    const categories = [...new Set(transactions.map(t => t.category))];
+    const transactions = useSelector(
+        (state) => state.transaction
+    ) || [];
+    const categories = allCategories;
 
     //const incomes = useMemo(() =>
     //  incomesData.filter(e => e.user === currentUser?.email),
@@ -48,61 +58,35 @@ function TransactionPage() {
     // ...expenses.map((exp) => ({ ...exp, type: "expense" }))
     //];
 
-    const filteredTransactions = transactions.filter((t) => {
 
-        const month = new Date(t.date).getMonth() + 1;
-        const category = t.category;
-        const details = t.type === "income" ? t.source : t.to;
+    useEffect(() => {
+    const fetchAllCategories = async () => {
+        try {
+            const res = await axios.get(
+                `${API_URL}/transaction/all`,
+                {
+                    withCredentials: true
+                }
+            );
 
-        const categoryMatch = categoryFilter ? (category || "").toLowerCase() === categoryFilter.toLowerCase() : true;
-        const monthMatch = monthFilter ? month === Number(monthFilter) : true;
-        const typeMatch = typeFilter ? t.type === typeFilter : true;
-        const searchMatch = search
-            ? details.toLowerCase().includes(search.toLowerCase())
-            : true;
+            const uniqueCategories = [
+                ...new Set(
+                    res.data
+                        .map((item) => item.category?.trim())
+                        .filter(Boolean)
+                )
+            ];
 
-        return categoryMatch && monthMatch && typeMatch && searchMatch;
-    });
+            setAllCategories(uniqueCategories);
 
-    const sortedTransactions = [...filteredTransactions].sort(
-        (a, b) => new Date(b.date) - new Date(a.date)
-    );
+        } catch (err) {
+            console.log(err);
+        }
+    };
 
-    function renderPaginationControls() {
-        return (
-            <div className="pagination">
-                <button
-                    onClick={() => setCurrentPage((prev) => prev - 1)}
-                    disabled={currentPage === 1}
-                >
-                    Previous
-                </button>
+    fetchAllCategories();
+}, []);
 
-                {Array.from({ length: totalPages }, (_, i) => (
-                    <button
-                        key={i}
-                        className={currentPage === i + 1 ? "active-page" : ""}
-                        onClick={() => setCurrentPage(i + 1)}
-                    >
-                        {i + 1}
-                    </button>
-                ))}
-
-                <button
-                    onClick={() => setCurrentPage((prev) => prev + 1)}
-                    disabled={currentPage === totalPages}
-                >
-                    Next
-                </button>
-            </div>
-        )
-    }
-
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-
-    const paginatedTransactions = filteredTransactions.slice(startIndex, endIndex);
-    const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
 
     useEffect(() => {
         if (!currentUser?.email) return;
@@ -110,15 +94,24 @@ function TransactionPage() {
         const fetchData = async () => {
             try {
                 const res = await axios.get(
-                   `${API_URL}/transaction`
+                    `${API_URL}/transaction`
                     , {
-                        withCredentials: true
+                        withCredentials: true,
+                        params: {
+                            page,
+                            limit,
+                            category: categoryFilter,
+                            type: typeFilter,
+                            month: monthFilter
+                        },
 
                     });
                 //console.log("CURRENT USER EMAIL:", currentUser.email);
                 //console.log("FETCHED TRANSACTIONS:", res.data);
 
-                dispatch(setTransactions(res.data));
+                dispatch(setTransactions(res.data.data));
+                setTotalPages(res.data.totalPages);
+                setTotal(res.data.total);
                 //dispatch(setExpense(expenseRes.data));
 
             } catch (err) {
@@ -127,19 +120,60 @@ function TransactionPage() {
         };
 
         fetchData();
-    }, [currentUser, dispatch]);
+    }, [currentUser,
+        page,
+        limit,
+        categoryFilter,
+        monthFilter,
+        typeFilter, dispatch]);
+
+    const downloadExcel = async () => {
+        const res = await fetch(`${API_URL}/transaction/export`, {
+            credentials: "include"
+        });
+
+
+        if (res.status === 401) {
+            alert("Session expired. Please login again.");
+
+            return;
+        }
+
+
+        if (!res.ok) {
+            const err = await res.json();
+            alert(err.message || "Download failed");
+            return;
+        }
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "transactions.xlsx";
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+    };
+
+
 
 
     return (
         <>
             <div className="expense-page">
-
-                <h2 className="expense-title">Transactions</h2>
-                <div className="filters">
-                <button className="filter-toggle" onClick={() => setDrawerOpen(true)}>
-                    ☰ Filters
-                </button>
-                <UploadFeature />
+                <div className="def">
+                    <h2 className="expense-title">Transactions</h2>
+                    <div className="filters">
+                        <button className="filter-toggle" onClick={() => setDrawerOpen(true)}>
+                            ☰ Filters
+                        </button>
+                        <UploadFeature />
+                        <button className="add-btn" onClick={downloadExcel}>
+                            Export File
+                        </button>
+                    </div>
                 </div>
 
                 <FilterDrawer
@@ -155,7 +189,7 @@ function TransactionPage() {
                     tempSearch={tempSearch}
                     setTempSearch={setTempSearch}
 
-                     categories={categories}
+                    categories={categories}
 
                     onApply={() => {
                         setCategoryFilter(tempCategory);
@@ -163,7 +197,7 @@ function TransactionPage() {
                         setTypeFilter(tempType);
                         setSearch(tempSearch);
                         setDrawerOpen(false);
-                        setCurrentPage(1); // reset page
+                        setPage(1); // reset page
                     }}
 
                     onReset={() => {
@@ -177,6 +211,8 @@ function TransactionPage() {
                         setTypeFilter("");
                         setSearch("");
                     }}
+                    showType={true}
+
                 />
 
                 <div className="expense-table-container">
@@ -192,8 +228,8 @@ function TransactionPage() {
                         </thead>
 
                         <tbody>
-                            {sortedTransactions.length > 0 ? (
-                                paginatedTransactions.map((t) => {
+                            {Array.isArray(transactions) && transactions.length > 0 ? (
+                                transactions.map((t) => {
 
                                     const category = t.type === "income" ? t.category : t.category;
                                     const details = t.type === "income" ? t.source : t.to;
@@ -226,7 +262,9 @@ function TransactionPage() {
                                 })
                             ) : (
                                 <tr>
-                                    <td colSpan="5">No transactions found</td>
+                                    <td colSpan="5" style={{ textAlign: "center" }}>
+                                        No transaction records found
+                                    </td>
                                 </tr>
                             )}
                         </tbody>
@@ -235,7 +273,14 @@ function TransactionPage() {
 
             </div>
 
-            {renderPaginationControls()}
+            <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+                limit={limit}
+                setLimit={setLimit}
+                total={total}
+            />
         </>
     );
 }

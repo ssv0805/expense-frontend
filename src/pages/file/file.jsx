@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import axios from 'axios';
+import Pagination from '../../components/Pagination';
 
 function Appp() {
-  const API_URL = "https://expense-backend-porh.onrender.com"
+  const API_URL =
+    window.location.hostname === "localhost"
+      ? "http://localhost:5000"
+      : "https://expense-backend-porh.onrender.com";
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState("");
   const [showForm, setShowForm] = useState(false);
@@ -101,177 +105,156 @@ function Appp() {
     setCurrentPage(1);
   };
 
-  function renderPaginationControls() {
-    return (
-      <div className="pagination">
-        <button
-          onClick={() => setCurrentPage((prev) => prev - 1)}
-          disabled={currentPage === 1}
-        >
-          Previous
-        </button>
-
-        {Array.from({ length: totalPages }, (_, i) => (
-          <button
-            key={i}
-            className={currentPage === i + 1 ? "active-page" : ""}
-            onClick={() => setCurrentPage(i + 1)}
-          >
-            {i + 1}
-          </button>
-        ))}
-
-        <button
-          onClick={() => setCurrentPage((prev) => prev + 1)}
-          disabled={currentPage === totalPages || totalPages === 0}
-        >
-          Next
-        </button>
-      </div>
-    );
-  }
 
   // PAGINATION LOGIC
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
 
-  const paginatedData = invalidData.slice(startIndex, endIndex);
-
-  const totalPages = Math.ceil(invalidData.length / itemsPerPage);
-
+  const paginatedData = invalidData.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   return (
-    <div className="expense-page">
-      <h2 className="expense-title">Upload File</h2>
+    <>
+      <div className="expense-page">
+        <h2 className="expense-title">Upload File</h2>
 
-      <div className="filters">
-        <button onClick={() => setShowForm(true)} className="add-btn">
-          Upload File
-        </button>
-        {summary && (
-          <div className="upload-summary">
-            Total: {summary.total} | Valid: {summary.valid} | Invalid: {summary.invalid}
+        <div className="filters">
+          <button onClick={() => setShowForm(true)} className="add-btn">
+            Upload File
+          </button>
+          {summary && (
+            <div className="upload-summary">
+              Total: {summary.total} | Valid: {summary.valid} | Invalid: {summary.invalid}
+            </div>
+          )}
+        </div>
+
+
+        <div className="expense-table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Row</th>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Errors</th>
+
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedData.length > 0 ? (
+                paginatedData.map((item, index) => (
+                  <tr key={index} className="invalid-row">
+                    <td>{item.row}</td>
+                    <td>{item.data?.Date}</td>
+                    <td>{item.data?.Type}</td>
+                    <td>{item.data?.Category}</td>
+                    <td>{item.data?.Amount}</td>
+
+                    <td>
+                      {item.errors.map((err, i) => (
+                        <div key={i} className="error-text">
+                          {err}
+                        </div>
+                      ))}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="no-data">
+                    No invalid records
+                  </td>
+                </tr>
+              )}
+            </tbody>
+
+          </table>
+        </div>
+
+
+
+        {showForm && (
+          <div className="modal-overlay" onClick={() => setShowForm(false)}>
+            <div
+              className="modal-content"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3>Upload File</h3>
+
+              <form onSubmit={handleUpload} className="expense-form">
+
+
+                <div
+                  className={`drop-zone ${dragActive ? "active" : ""}`}
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  <p>Drag & Drop file here</p>
+                  <p>or</p>
+
+                  <input
+                    type="file"
+                    onChange={(e) => {
+                      handleFileChange(e);
+                      e.target.value = null;
+                    }}
+                    id="fileInput"
+                    hidden
+                  />
+                  <label htmlFor="fileInput" className="browse-btn">
+                    Browse File
+                  </label>
+
+                  {file && (
+                    <div className="file-item">
+                      <span className="file-text">{file.name}</span>
+
+                      <button
+                        type="button"
+                        className="file-remove"
+                        onClick={handleRemoveFile}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* IMAGE PREVIEW */}
+                {preview && (
+                  <div style={{ marginTop: "10px" }}>
+                    <img src={preview} alt="preview" width="200" />
+                  </div>
+                )}
+
+                <br /><br />
+
+                <div className="modal-buttons" style={{ justifyContent: "space-between" }}>
+                  <a href="/documents/expensetemplate.xlsx" download>
+                    <button type="button">Download template</button>
+                  </a>
+                  <button type="submit">Upload</button>
+                </div>
+
+              </form>
+            </div>
           </div>
         )}
       </div>
-
-
-      <div className="expense-table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Row</th>
-              <th>Date</th>
-              <th>Type</th>
-              <th>Category</th>
-              <th>Amount</th>
-              <th>Errors</th>
-
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.length > 0 ? (
-              paginatedData.map((item, index) => (
-                <tr key={index} className="invalid-row">
-                  <td>{item.row}</td>
-                  <td>{item.data?.Date}</td>
-                  <td>{item.data?.Type}</td>
-                  <td>{item.data?.Category}</td>
-                  <td>{item.data?.Amount}</td>
-
-                  <td>
-                    {item.errors.map((err, i) => (
-                      <div key={i} className="error-text">
-                        {err}
-                      </div>
-                    ))}
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="6" className="no-data">
-                  No invalid records
-                </td>
-              </tr>
-            )}
-          </tbody>
-
-        </table>
-      </div>
-
-      {renderPaginationControls()}
-
-      {showForm && (
-        <div className="modal-overlay" onClick={() => setShowForm(false)}>
-          <div
-            className="modal-content"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3>Upload File</h3>
-
-            <form onSubmit={handleUpload} className="expense-form">
-
-
-              <div
-                className={`drop-zone ${dragActive ? "active" : ""}`}
-                onDragOver={handleDragOver}
-                onDragEnter={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-              >
-                <p>Drag & Drop file here</p>
-                <p>or</p>
-
-                <input
-                  type="file"
-                  onChange={(e) => {
-                    handleFileChange(e);
-                    e.target.value = null; // 👈 important
-                  }}
-                  id="fileInput"
-                  hidden
-                />
-                <label htmlFor="fileInput" className="browse-btn">
-                  Browse File
-                </label>
-
-                {file && (
-                  <div className="file-item">
-                    <span className="file-text">{file.name}</span>
-
-                    <button
-                      type="button"
-                      className="file-remove"
-                      onClick={handleRemoveFile}
-                    >
-                      ×
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* IMAGE PREVIEW */}
-              {preview && (
-                <div style={{ marginTop: "10px" }}>
-                  <img src={preview} alt="preview" width="200" />
-                </div>
-              )}
-
-              <br /><br />
-
-              <div className="modal-buttons" style={{ justifyContent: "space-between" }}>
-                <a href="/documents/expensetemplate.xlsx" download>
-                  <button type="button">Download template</button>
-                </a>
-                <button type="submit">Upload</button>
-              </div>
-
-            </form>
-          </div>
-        </div>
-      )}
-    </div>
+      <Pagination
+        totalItems={invalidData.length}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        itemsPerPage={itemsPerPage}
+        setItemsPerPage={setItemsPerPage}
+      />
+    </>
   );
 }
 

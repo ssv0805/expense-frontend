@@ -1,5 +1,3 @@
-
-
 function Avatar({ name = "User" }) {
   const getInitials = (fullName) => {
     const words = fullName.trim().split(" ").filter(Boolean);

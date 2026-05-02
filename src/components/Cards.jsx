@@ -15,16 +15,16 @@ function Card({
   return (
     <div className="cards">
       <div className="card balance">
-        <h3>Total Balance</h3>
+        <p className="aa">Total Balance</p>
         <h2>Rs.{balance}</h2>
-        <p className={balancePositive ? "positive" : "negative"} style={{fontWeight:"bold"}}>
+        <p className={balancePositive ? "positive" : "negative"} >
           {balancePositive ? "+" : ""}
           {balanceChange}% vs last month
         </p>
       </div>
 
       <div className="card income">
-        <h3>Monthly Income</h3>
+        <p className="aa">Monthly Income</p>
         <h2>Rs.{income}</h2>
         <p className={incomePositive ? "positive" : "negative"}>
           {incomePositive ? "+" : ""}
@@ -33,7 +33,7 @@ function Card({
       </div>
 
       <div className="card expense">
-        <h3>Monthly Expenses</h3>
+        <p className="aa">Monthly Expenses</p>
         <h2>Rs.{expense}</h2>
         <p className={expensePositive ? "positive" : "negative"}>
           {Number(expenseChange) > 0 ? "+" : ""}
@@ -42,9 +42,9 @@ function Card({
       </div>
 
       <div className="card savings">
-        <h3>Savings</h3>
+        <p className="aa">Savings</p>
         <h2>Rs.{savings}</h2>
-        <p style={{fontSize:"14px", fontWeight:"bold"}}>{savingsPercent}% of income saved</p>
+        <p style={{fontSize:"14px"}}>{savingsPercent}% of income saved</p>
         <div className="progress">
           <div
             className="progress-bar"
