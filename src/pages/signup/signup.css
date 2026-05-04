@@ -198,6 +198,7 @@ p {
     max-width: 350px;
     padding: 25px;
     border-radius: 12px;
+    margin-left:-10px;
   }
 
   /* Optional: center heading */
@@ -205,5 +206,11 @@ p {
     text-align: center;
     margin-bottom: 20px;
   }
+
+  .f1 {
+    width:300px;
+  }
+
+  
 
 }

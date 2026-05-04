@@ -10,7 +10,7 @@ function Expense() {
     const API_URL =
         window.location.hostname === "localhost"
             ? "http://localhost:5000"
-            : "https://expense-backend-porh.onrender.com";
+            : "https://trackify-backend-3kys.onrender.com";
 
     const [editId, setEditId] = useState(null);
     const [page, setPage] = useState(1);

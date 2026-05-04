@@ -12,7 +12,7 @@ function TransactionPage() {
     const API_URL =
         window.location.hostname === "localhost"
             ? "http://localhost:5000"
-            : "https://expense-backend-porh.onrender.com";
+            : "https://trackify-backend-3kys.onrender.com";
     //const sessionId = localStorage.getItem("sessionId");
     const dispatch = useDispatch();
     const navigate = useNavigate();

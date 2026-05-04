@@ -22,7 +22,7 @@ function Chart() {
   const API_URL =
     window.location.hostname === "localhost"
       ? "http://localhost:5000"
-      : "https://expense-backend-porh.onrender.com";
+      : "https://trackify-backend-3kys.onrender.com";
 
   // ✅ FETCH ALL TRANSACTIONS
   useEffect(() => {
@@ -89,7 +89,7 @@ function Chart() {
         </div>
       ) : (
         <div className="pie-container">
-          <ResponsiveContainer width="60%" height={250}>
+          <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
                 data={data}

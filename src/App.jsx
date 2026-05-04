@@ -19,7 +19,7 @@ import axios from "axios";
 
 function App() {
 
-  const API_URL="https://expense-backend-porh.onrender.com"
+  const API_URL="https://trackify-backend-3kys.onrender.com"
   
   return (
 

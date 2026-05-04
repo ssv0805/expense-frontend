@@ -11,7 +11,7 @@ const Signup = () => {
     const API_URL =
   window.location.hostname === "localhost"
     ? "http://localhost:5000"
-    : "https://expense-backend-porh.onrender.com";
+    : "https://trackify-backend-3kys.onrender.com";
     let regex = /^[a-zA-Z0-9]+(?:[._+-][a-zA-Z0-9]+)*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;;
     let pattern = /^[a-zA-Z]+$/;
     const [showPassword, setShowPassword] = useState(false);
@@ -127,7 +127,7 @@ const Signup = () => {
         <div className="login-page">
             <div className="left-section">
                 <h1 className="title">Trackify</h1>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} className="f1">
                     <div className="container">
                         <div className="header">
                             <div className="text">Sign Up</div>

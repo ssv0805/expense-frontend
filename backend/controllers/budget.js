@@ -6,13 +6,29 @@ const addBudget = async (req, res) => {
         const { category, amount } = req.body;
 
         const now = new Date();
+        const month = now.toLocaleString("default", { month: "long" });
+        const year = now.getFullYear();
+
+        // Check if budget already exists
+        const existingBudget = await Budget.findOne({
+            user: req.user.email,
+            category,
+            month,
+            year
+        });
+
+        if (existingBudget) {
+            return res.status(400).json({
+                message: `Budget for ${category} already exists this month`
+            });
+        }
 
         const budget = new Budget({
             user: req.user.email,
             category,
             amount,
-            month: now.toLocaleString("default", { month: "long" }),
-            year: now.getFullYear()
+            month,
+            year
         });
 
         const saved = await budget.save();
@@ -26,7 +42,16 @@ const addBudget = async (req, res) => {
 // 📥 GET BUDGETS
 const getBudgets = async (req, res) => {
     try {
-        const budgets = await Budget.find({ user: req.user.email });
+        const now = new Date();
+        const month = now.toLocaleString("default", { month: "long" });
+        const year = now.getFullYear();
+
+        const budgets = await Budget.find({
+            user: req.user.email,
+            month,
+            year
+        });
+
         res.json(budgets);
     } catch (err) {
         res.status(500).json(err);
@@ -36,12 +61,25 @@ const getBudgets = async (req, res) => {
 // ✏️ UPDATE
 const updateBudget = async (req, res) => {
     try {
-        const updated = await Budget.findByIdAndUpdate(
-            req.params.id,
-            req.body,
+        const { amount } = req.body;
+
+        const updated = await Budget.findOneAndUpdate(
+            {
+                _id: req.params.id,
+                user: req.user.email
+            },
+            { amount },
             { new: true }
         );
+
+        if (!updated) {
+            return res.status(404).json({
+                message: "Budget not found"
+            });
+        }
+
         res.json(updated);
+
     } catch (err) {
         res.status(500).json(err);
     }

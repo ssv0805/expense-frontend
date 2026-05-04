@@ -393,6 +393,100 @@ app.post("/logout", async (req, res) => {
   });
 });
 
+// UPDATE NAME
+app.put("/update-name", auth, async (req, res) => {
+  try {
+    const { name } = req.body;
+
+    if (!name || name.trim() === "") {
+      return res.status(400).json({
+        success: false,
+        message: "Name cannot be empty",
+      });
+    }
+
+    const updatedUser = await collection.findOneAndUpdate(
+      { email: req.user.email },
+      { $set: { name: name.trim() } },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Name updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+});
+
+// CHANGE PASSWORD
+app.put("/change-password", auth, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    if (newPassword.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters",
+      });
+    }
+
+    const user = await collection.findOne({
+      email: req.user.email,
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(
+      currentPassword,
+      user.password
+    );
+
+    if (!isMatch) {
+      return res.status(400).json({
+        success: false,
+        message: "Current password is incorrect",
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await collection.updateOne(
+      { email: req.user.email },
+      { $set: { password: hashedPassword } }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+});
+
 //Job Scheduling
 cron.schedule("*/5 * * * * *", async () => {
   if (isRunning || uploadQueue.length === 0) return;

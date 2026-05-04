@@ -53,34 +53,59 @@ const createBill = async (req, res) => {
 // ✅ GET BILLS (AUTO MONTH LOGIC + CLOSED SKIP)
 const getBills = async (req, res) => {
     try {
-        const bills = await Bill.find({ user: req.user.email })
-            .sort({ createdAt: -1 });
+        const bills = await Bill.find({ user: req.user.email });
 
-        const today = new Date();
+        const currentMonth = new Date().toISOString().slice(0, 7);
+        const today = new Date().getDate();
 
-        for (let bill of bills) {
+        // ✅ Only run generation on/after 1st
+        if (today >= 1) {
 
-            // ❌ Do not touch closed bills
-            if (bill.status === "closed") continue;
+            for (let bill of bills) {
 
-            const due = new Date(bill.dueDate);
+                if (bill.frequency !== "Monthly") continue;
+                if (bill.status === "closed") continue;
 
-            // ✅ If unpaid & overdue → move to next month
-            if (
-                bill.frequency === "Monthly" &&
-                bill.status === "unpaid" &&
-                due < today
-            ) {
-                const nextDue = new Date(due);
-                nextDue.setMonth(nextDue.getMonth() + 1);
+                const billMonth = bill.dueDate.slice(0, 7);
 
-                bill.dueDate = nextDue.toISOString().split("T")[0];
+                // 🔥 If bill belongs to previous month → generate current month bill
+                if (billMonth < currentMonth) {
 
-                await bill.save();
+                    const exists = await Bill.findOne({
+                        name: bill.name,
+                        user: bill.user,
+                        dueDate: { $regex: `^${currentMonth}` }
+                    });
+
+                    if (!exists) {
+                        const oldDate = new Date(bill.dueDate);
+                        const newDate = new Date();
+
+                        // keep same day (like 19th → 19th)
+                        newDate.setDate(oldDate.getDate());
+
+                        const finalDate = `${currentMonth}-${String(newDate.getDate()).padStart(2, "0")}`;
+
+                        await Bill.create({
+                            name: bill.name,
+                            amount: bill.amount,
+                            category: bill.category,
+                            dueDate: finalDate,
+                            frequency: "Monthly",
+                            paymentMethod: bill.paymentMethod,
+                            status: "unpaid",
+                            user: bill.user
+                        });
+                    }
+                }
             }
         }
 
-        res.status(200).json(bills);
+        // ✅ return updated list
+        const updatedBills = await Bill.find({ user: req.user.email })
+            .sort({ dueDate: -1 });
+
+        res.status(200).json(updatedBills);
 
     } catch (err) {
         console.log("GET BILLS ERROR:", err);
@@ -109,7 +134,7 @@ const payBill = async (req, res) => {
 
         const currentMonth = new Date().toISOString().slice(0, 7);
 
-        // 🚨 prevent duplicate paid
+        // 🚨 prevent duplicate payment
         const duplicatePaid = await Bill.findOne({
             name: bill.name,
             user: req.user.email,
@@ -142,32 +167,6 @@ const payBill = async (req, res) => {
         bill.lastPaidMonth = currentMonth;
 
         await bill.save();
-
-
-        // ✅ CREATE NEXT MONTH BILL (IMPORTANT FEATURE)
-        const nextMonthDate = new Date(bill.dueDate);
-        nextMonthDate.setMonth(nextMonthDate.getMonth() + 1);
-
-        const nextMonth = nextMonthDate.toISOString().slice(0, 7);
-
-        const nextExists = await Bill.findOne({
-            name: bill.name,
-            user: bill.user,
-            dueDate: { $regex: `^${nextMonth}` }
-        });
-
-        if (!nextExists && bill.status !== "closed") {
-            await Bill.create({
-                name: bill.name,
-                amount: bill.amount,
-                category: bill.category,
-                dueDate: nextMonthDate.toISOString().split("T")[0],
-                frequency: "Monthly",
-                paymentMethod: bill.paymentMethod,
-                status: "unpaid",
-                user: bill.user
-            });
-        }
 
         res.json({
             message: "Bill paid successfully",

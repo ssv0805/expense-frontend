@@ -689,7 +689,7 @@ button {
   margin: 12px 0;
 }
 
-/* ✅ footer layout */
+/*  footer layout */
 .budget-footer {
   display: flex;
   justify-content: space-between;
@@ -697,7 +697,7 @@ button {
   margin-top: 10px;
 }
 
-/* ✅ improved delete button */
+/* improved delete button */
 .delete-btn {
   background: #ff4d4f;
   color: white;
@@ -709,11 +709,22 @@ button {
   transition: 0.2s;
 }
 
+.edit-btn {
+  background: #3b1347;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  margin: 1px;
+  cursor: pointer;
+  
+  transition: 0.2s;
+}
+
 .delete-btn:hover {
   background: #d9363e;
 }
 
-/* ✅ warning + error styles (cleaner) */
+/* warning + error styles (cleaner) */
 .warning-text {
   color: #fa8c16;
   font-size: 13px;
@@ -777,13 +788,13 @@ button {
   color: #444;
 }
 
-/* Buttons Container */
+
 .page-buttons {
   display: flex;
   gap: 6px;
 }
 
-/* Buttons Style */
+
 .page-buttons button {
   border: none;
   background: #1b0b34;
@@ -795,24 +806,23 @@ button {
   font-size: 8px;
 }
 
-/* Hover */
+
 .page-buttons button:hover:not(:disabled) {
   background: #cbb4f0;
 }
 
-/* Active Click */
+
 .page-buttons button:active:not(:disabled) {
   transform: scale(0.95);
 }
 
-/* Disabled State */
 .page-buttons button:disabled {
   background: #817d7d;
   color: #b0adad;
   cursor: not-allowed;
 }
 
-/* RESPONSIVE */
+
 @media (max-width: 768px) {
   .pagination-bar {
     flex-direction: column;
@@ -833,6 +843,58 @@ button {
     padding: 5px 8px;
     font-size: 12px;
   }
+   .def {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+ 
+  .abcd {
+    display: flex;
+    flex-direction: row;    
+    gap: 8px;
+    flex-wrap: wrap;         
+    width: 100%;
+  }
+
+
+  .add-btn,
+  .filter-toggle,
+  .cancel-btn {
+    width: auto;            
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+ 
+  .def h2 {
+    margin: 0;
+  }
+
+  .modal-content{
+    width:300px;
+  }
+
+  .filters {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .filters select {
+    width: 100%;
+  }
+
+  
+  .expense-table-container {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 600px;   /* prevents breaking */
+  }
+
+
 }
 
 .def {
@@ -845,5 +907,6 @@ button {
   margin-top: 5px;
   align-items: center;
 }
+
 
 
