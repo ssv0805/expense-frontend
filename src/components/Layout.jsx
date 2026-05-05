@@ -1,14 +1,17 @@
 import Sidebar from "./Sidebar";
 import Avatar from "./Avatar";
 import "../pages/Dashboard/dashboard.css";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import { Outlet } from "react-router-dom";
-import { useSelector } from "react-redux";
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, X } from "lucide-react";
 import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { loginSuccess } from "../features/user/userSlice";
 
 function Layout() {
   const currentUser = useSelector((state) => state.user.currentUser);
+  const dispatch = useDispatch();
 
   const API_URL =
     window.location.hostname === "localhost"
@@ -18,10 +21,14 @@ function Layout() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showCPassword, setShowCPassword] = useState(false);
+  const [showNPassword, setShowNPassword] = useState(false);
 
   const [newName, setNewName] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const dropdownRef = useRef(null);
 
@@ -43,6 +50,7 @@ function Layout() {
         setShowDropdown(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
     return () =>
       document.removeEventListener("mousedown", handleClickOutside);
@@ -54,41 +62,58 @@ function Layout() {
     setShowDropdown(false);
   };
 
-  // ✅ Update Name
-const handleNameUpdate = async () => {
-  try {
-    await axios.put(
-      `${API_URL}/update-name`,
-      { name: newName },
-      { withCredentials: true }
-    );
+  // Update Name
+  const handleNameUpdate = async () => {
+    try {
+      await axios.put(
+        `${API_URL}/update-name`,
+        { name: newName },
+        { withCredentials: true }
+      );
 
-    alert("Name updated");
-    setShowModal(false);
-    window.location.reload();
-  } catch (err) {
-    alert(err.response?.data?.message || "Error updating name");
-  }
-};
+      dispatch(
+        loginSuccess({
+          ...currentUser,
+          name: newName,
+        })
+      );
 
-  // ✅ Change Password
-const handlePasswordUpdate = async () => {
-  try {
-    await axios.put(
-      `${API_URL}/change-password`,
-      { currentPassword, newPassword },
-      { withCredentials: true }
-    );
+      setShowModal(false);
+      setNewName("");
 
-    alert("Password updated");
-    setShowModal(false);
+      alert("Name updated");
+    } catch (err) {
+      alert(err.response?.data?.message || "Error updating name");
+    }
+  };
 
-    setCurrentPassword("");
-    setNewPassword("");
-  } catch (err) {
-    alert(err.response?.data?.message || "Error updating password");
-  }
-};
+  // Change Password
+  const handlePasswordUpdate = async () => {
+    if (newPassword !== confirmPassword) {
+      alert("New password and confirm password do not match");
+      return;
+    }
+
+    try {
+      await axios.put(
+        `${API_URL}/change-password`,
+        {
+          currentPassword,
+          newPassword,
+        },
+        { withCredentials: true }
+      );
+
+      alert("Password updated");
+      setShowModal(false);
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      alert(err.response?.data?.message || "Error updating password");
+    }
+  };
 
   return (
     <div className="dashboard">
@@ -131,25 +156,24 @@ const handlePasswordUpdate = async () => {
         </div>
       </div>
 
-      
+      {/* MODAL */}
       {showModal && (
         <div className="modal-overlay">
           <div className="profile-modal">
             <div className="def">
-               <h2>
-              {modalType === "name"
-                ? "Edit Name"
-                : "Change Password"}
-            </h2>
+              <h2>
+                {modalType === "name"
+                  ? "Edit Name"
+                  : "Change Password"}
+              </h2>
 
-            <button
-              className="close-btn" style={{background :"#3b1347"}}
-              onClick={() => setShowModal(false)}
-            >
-              X
-            </button>
-
-           
+              <button
+                className="close-btn"
+                style={{ background: "white", border: "0" }}
+                onClick={() => setShowModal(false)}
+              >
+                <X size={20} />
+              </button>
             </div>
 
             {modalType === "name" ? (
@@ -166,22 +190,54 @@ const handlePasswordUpdate = async () => {
               </>
             ) : (
               <>
-                <input
-                  type="password"
-                  placeholder="Current Password"
-                  value={currentPassword}
-                  onChange={(e) =>
-                    setCurrentPassword(e.target.value)
-                  }
-                />
-                <input
-                  type="password"
-                  placeholder="New Password"
-                  value={newPassword}
-                  onChange={(e) =>
-                    setNewPassword(e.target.value)
-                  }
-                />
+                <div className="input password-input">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Current Password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                  />
+
+                  <span
+                    className="toggle-btn"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FiEyeOff /> : <FiEye />}
+                  </span>
+                </div>
+
+                <div className="input password-input">
+                  <input
+                    type={showNPassword ? "text" : "password"}
+                    placeholder="New Password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+
+                  <span
+                    className="toggle-btn"
+                    onClick={() => setShowNPassword(!showNPassword)}
+                  >
+                    {showNPassword ? <FiEyeOff /> : <FiEye />}
+                  </span>
+                </div>
+
+                <div className="input password-input">
+                  <input
+                    type={showCPassword ? "text" : "password"}
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+
+                  <span
+                    className="toggle-btn"
+                    onClick={() => setShowCPassword(!showCPassword)}
+                  >
+                    {showCPassword ? <FiEyeOff /> : <FiEye />}
+                  </span>
+                </div>
+
                 <button
                   className="save-btn"
                   onClick={handlePasswordUpdate}

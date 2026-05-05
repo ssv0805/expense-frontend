@@ -148,6 +148,29 @@ const upload = multer({
   },
 });
 
+app.get("/me", auth, async (req, res) => {
+  try {
+    const user = await collection.findOne({
+      email: req.user.email,
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      name: user.name,
+      email: user.email,
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+});
+
 //UPLOAD route
 app.post("/upload", auth, (req, res) => {
   upload.single("file")(req, res, async (err) => {
@@ -317,8 +340,8 @@ app.post("/login", async (req, res) => {
     //res.cookie(name, value [, options])
     res.cookie("sessionId", sessionId, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: true,
+      sameSite: "none",
     });
     return res.status(200).json({
       success: true,
@@ -383,8 +406,8 @@ app.post("/logout", async (req, res) => {
 
   res.clearCookie("sessionId", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: true,
+    sameSite: "none",
   });
 
   return res.status(200).json({
@@ -408,7 +431,7 @@ app.put("/update-name", auth, async (req, res) => {
     const updatedUser = await collection.findOneAndUpdate(
       { email: req.user.email },
       { $set: { name: name.trim() } },
-      { new: true }
+      { new: true },
     );
 
     return res.status(200).json({
@@ -455,10 +478,7 @@ app.put("/change-password", auth, async (req, res) => {
       });
     }
 
-    const isMatch = await bcrypt.compare(
-      currentPassword,
-      user.password
-    );
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
 
     if (!isMatch) {
       return res.status(400).json({
@@ -471,7 +491,7 @@ app.put("/change-password", auth, async (req, res) => {
 
     await collection.updateOne(
       { email: req.user.email },
-      { $set: { password: hashedPassword } }
+      { $set: { password: hashedPassword } },
     );
 
     return res.status(200).json({
