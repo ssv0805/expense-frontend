@@ -342,6 +342,7 @@ app.post("/login", async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: "none",
+      path: "/",
     });
     return res.status(200).json({
       success: true,
@@ -408,6 +409,7 @@ app.post("/logout", async (req, res) => {
     httpOnly: true,
     secure: true,
     sameSite: "none",
+    path: "/",
   });
 
   return res.status(200).json({

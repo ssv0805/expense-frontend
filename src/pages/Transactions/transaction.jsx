@@ -129,7 +129,9 @@ function TransactionPage() {
 
     const downloadExcel = async () => {
         const res = await fetch(`${API_URL}/transaction/export`, {
-            credentials: "include"
+            
+                    withCredentials: true
+                
         });
 
 
