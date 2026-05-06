@@ -631,6 +631,11 @@ body {
   gap: 15px;
 }
 
+.pie-items{
+  gap:5px;
+  font-size:11px;
+}
+
 .profile-modal h2 {
   margin: 0;
   text-align: center;
