@@ -160,7 +160,7 @@ function Layout() {
       {showModal && (
         <div className="modal-overlay">
           <div className="profile-modal">
-            <div className="def">
+            <div className="ef def">
               <h2>
                 {modalType === "name"
                   ? "Edit Name"
