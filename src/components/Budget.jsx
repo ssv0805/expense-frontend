@@ -6,7 +6,7 @@ function Budget() {
   const API_URL =
     window.location.hostname === "localhost"
       ? "http://localhost:5000"
-      : "https://trackify-backend-3kys.onrender.com";
+      : "https://expense-backend-porh.onrender.com";
 
   const [budgets, setBudgets] = useState([]);
   const [transactions, setTransactions] = useState([]);
@@ -86,8 +86,8 @@ function Budget() {
                       percent > 100
                         ? "red"
                         : percent > 80
-                        ? "#e846a4"
-                        : "#6a2c91",
+                          ? "#e846a4"
+                          : "#6a2c91",
                   }}
                 ></div>
               </div>

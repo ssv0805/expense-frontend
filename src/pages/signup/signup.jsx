@@ -9,9 +9,9 @@ import myImage from '../../assets/images/login3.png';
 
 const Signup = () => {
     const API_URL =
-  window.location.hostname === "localhost"
-    ? "http://localhost:5000"
-    : "https://trackify-backend-3kys.onrender.com";
+        window.location.hostname === "localhost"
+            ? "http://localhost:5000"
+            : "https://expense-backend-porh.onrender.com";
     let regex = /^[a-zA-Z0-9]+(?:[._+-][a-zA-Z0-9]+)*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;;
     let pattern = /^[a-zA-Z]+$/;
     const [showPassword, setShowPassword] = useState(false);
@@ -64,7 +64,7 @@ const Signup = () => {
             isValid = false;
             formErrors.password = "password is required";
         }
-        else if (password.length < 8 || password.length >20) {
+        else if (password.length < 8 || password.length > 20) {
             isValid = false;
             formErrors.password = "Password must contain atleast 8-20 characters";
         }

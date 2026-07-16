@@ -6,7 +6,7 @@ function Appp() {
   const API_URL =
     window.location.hostname === "localhost"
       ? "http://localhost:5000"
-      : "https://trackify-backend-3kys.onrender.com";
+      : "https://expense-backend-porh.onrender.com";
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState("");
   const [showForm, setShowForm] = useState(false);

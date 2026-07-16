@@ -16,7 +16,7 @@ function Layout() {
   const API_URL =
     window.location.hostname === "localhost"
       ? "http://localhost:5000"
-      : "https://trackify-backend-3kys.onrender.com";
+      : "https://expense-backend-porh.onrender.com";
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -138,9 +138,9 @@ function Layout() {
             <div className="user" ref={dropdownRef}>
               <Avatar name={formatName(currentUser?.name)} />
 
-              <span style={{ fontSize: "16px", fontWeight: "bold"  }} onClick={() => setShowDropdown(!showDropdown)}>
+              <span style={{ fontSize: "16px", fontWeight: "bold" }} onClick={() => setShowDropdown(!showDropdown)}>
                 {formatName(currentUser?.name)}
-                
+
               </span>
 
               <button

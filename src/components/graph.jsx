@@ -20,7 +20,7 @@ function Graph() {
   const API_URL =
     window.location.hostname === "localhost"
       ? "http://localhost:5000"
-      : "https://trackify-backend-3kys.onrender.com";
+      : "https://expense-backend-porh.onrender.com";
 
   // ✅ GET ALL TRANSACTIONS (NOT PAGINATED)
   useEffect(() => {
@@ -50,8 +50,8 @@ function Graph() {
   );
 
   const months = [
-    "Jan","Feb","Mar","Apr","May","Jun",
-    "Jul","Aug","Sep","Oct","Nov","Dec"
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
   ];
 
   const monthlyData = months.map((month, index) => {

@@ -15,7 +15,7 @@ function Income() {
     const API_URL =
         window.location.hostname === "localhost"
             ? "http://localhost:5000"
-            : "https://trackify-backend-3kys.onrender.com";
+            : "https://expense-backend-porh.onrender.com";
 
     // Pagination
     const [page, setPage] = useState(1);
@@ -43,7 +43,7 @@ function Income() {
     const transactions = useSelector((state) => state.transaction);
 
     const incomes = Array.isArray(transactions) ? transactions : [];
-    
+
 
     const predefinedCategories = [
         "Salary", "Reward", "Bonus", "Friend", "Other"
@@ -54,8 +54,8 @@ function Income() {
         .filter(Boolean);
 
     const categories = [
-    ...new Set([...predefinedCategories, ...allCategories])
-];
+        ...new Set([...predefinedCategories, ...allCategories])
+    ];
 
     const [showForm, setShowForm] = useState(false);
 
@@ -71,25 +71,25 @@ function Income() {
 
     // FETCH
 
-        useEffect(() => {
-    const fetchCategories = async () => {
-        try {
-            const res = await axios.get(
-                `${API_URL}/transaction/categories`,
-                {
-                    withCredentials: true,
-                    params: { type: "income" }
-                }
-            );
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await axios.get(
+                    `${API_URL}/transaction/categories`,
+                    {
+                        withCredentials: true,
+                        params: { type: "income" }
+                    }
+                );
 
-            setAllCategories(res.data);
-        } catch (err) {
-            console.log(err);
-        }
-    };
+                setAllCategories(res.data);
+            } catch (err) {
+                console.log(err);
+            }
+        };
 
-    fetchCategories();
-}, []);
+        fetchCategories();
+    }, []);
 
     useEffect(() => {
         const fetchTransactions = async () => {

@@ -6,7 +6,7 @@ function Bills() {
   const API_URL =
     window.location.hostname === "localhost"
       ? "http://localhost:5000"
-      : "https://trackify-backend-3kys.onrender.com";
+      : "https://expense-backend-porh.onrender.com";
 
   const [bills, setBills] = useState([]);
 
@@ -29,7 +29,7 @@ function Bills() {
           const dueDate = new Date(bill.dueDate);
           dueDate.setHours(0, 0, 0, 0);
 
-          return bill.status === "unpaid" && (dueDate <= today  || dueDate>=today);
+          return bill.status === "unpaid" && (dueDate <= today || dueDate >= today);
         })
         .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
         .slice(0, 6);

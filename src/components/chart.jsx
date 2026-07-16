@@ -22,7 +22,7 @@ function Chart() {
   const API_URL =
     window.location.hostname === "localhost"
       ? "http://localhost:5000"
-      : "https://trackify-backend-3kys.onrender.com";
+      : "https://expense-backend-porh.onrender.com";
 
   // ✅ FETCH ALL TRANSACTIONS
   useEffect(() => {
