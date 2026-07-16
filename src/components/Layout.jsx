@@ -18,6 +18,8 @@ function Layout() {
       ? "http://localhost:5000"
       : "https://trackify-backend-3kys.onrender.com";
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const [showDropdown, setShowDropdown] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState("");
@@ -117,17 +119,28 @@ function Layout() {
 
   return (
     <div className="dashboard">
-      <Sidebar />
+      <Sidebar
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
 
       <div className="main">
         {/* TOPBAR */}
         <div className="topbar">
+
           <div className="user-section">
+            <button
+              className="menu-btn"
+              onClick={() => setSidebarOpen(true)}
+            >
+              ☰
+            </button>
             <div className="user" ref={dropdownRef}>
               <Avatar name={formatName(currentUser?.name)} />
 
-              <span style={{ fontSize: "16px", fontWeight: "bold" }}>
+              <span style={{ fontSize: "16px", fontWeight: "bold"  }} onClick={() => setShowDropdown(!showDropdown)}>
                 {formatName(currentUser?.name)}
+                
               </span>
 
               <button

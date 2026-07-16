@@ -4,7 +4,7 @@ body {
   background: #f6f3f8;
 }
 
-.dashboard {
+.dashboard { 
   display: flex;
   min-height: 100vh;
   
@@ -668,6 +668,11 @@ body {
   font-weight: 500;
 }
 
+.menu-btn {
+  display: none;
+}
+/* 
+
 .save-btn:hover {
   background: #5a1a6b;
 }
@@ -696,7 +701,48 @@ body {
   color: #fffdff !important;
 }
 
-/* ================= MOBILE ================= */
+
+
+/* MOBILE DRAWER */
+@media (max-width: 768px) {
+
+  .sidebar-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  transform: translateX(-100%);
+  height: 100vh;
+  width: 230px;
+  background: #fff;
+  z-index: 1000;
+  transition: transform 0.3s ease;
+  overflow: hidden; /* ✅ important */
+}
+
+.sidebar-wrapper.open {
+  transform: translateX(0);
+}
+
+  .sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    z-index: 999;
+  }
+
+  .menu-btn {
+    display: block;
+    font-size: 22px;
+    background: none;
+    border: none;
+    margin-right: 10px;
+  }
+}
+
+/*================= MOBILE ================= */
 
 @media (max-width: 768px) {
   .profile-modal {
@@ -714,63 +760,12 @@ body {
     flex-direction: column;
   }
 
-  .sidebar {
-    width: 100%;
-    max-width: 100%;
-    left: 0;
 
-    position: relative;
-
-    height: auto;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 10px;
-    padding: 8px 10px;
-    overflow-x: auto;
-    white-space: nowrap;
-  }
-
-  .logo {
-    flex-shrink: 0;
-    margin: 0;
-  }
-
-  .logo img {
-    width: 80px;
-  }
-
-  .menu {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    margin: 0;
-    padding: 0;
-  }
-
-  .menu li {
-    list-style: none;
-    flex-shrink: 0; /* 🔥 prevent squeezing */
-  }
-
-  .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 8px 10px;
-    font-size: 12px;
-    white-space: nowrap; /* 🔥 keep text in one line */
-  }
-
-  .icon {
-    width: 16px;
-    height: 16px;
-  }
+  
 
   .main {
     margin-left: 0;
-    margin-right:-20px;
+    margin-right:0;
     
   }
 
@@ -799,17 +794,16 @@ body {
   }
 
   .logout-btn {
-    font-size: 0;
+    font-size: 20px;
     display: flex;
     align-items: center;
     gap: 5px;
     padding: 8px 10px;
     margin: 2px;
     white-space: nowrap;
+    margin-bottom: 15px;
   }
-  .logout-btn .avatar {
-    display: none;
-  }
+  
 
   
   .pie-container{
