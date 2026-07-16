@@ -60,32 +60,32 @@ function TransactionPage() {
 
 
     useEffect(() => {
-    const fetchAllCategories = async () => {
-        try {
-            const res = await axios.get(
-                `${API_URL}/transaction/all`,
-                {
-                    withCredentials: true
-                }
-            );
+        const fetchAllCategories = async () => {
+            try {
+                const res = await axios.get(
+                    `${API_URL}/transaction/all`,
+                    {
+                        withCredentials: true
+                    }
+                );
 
-            const uniqueCategories = [
-                ...new Set(
-                    res.data
-                        .map((item) => item.category?.trim())
-                        .filter(Boolean)
-                )
-            ];
+                const uniqueCategories = [
+                    ...new Set(
+                        res.data
+                            .map((item) => item.category?.trim())
+                            .filter(Boolean)
+                    )
+                ];
 
-            setAllCategories(uniqueCategories);
+                setAllCategories(uniqueCategories);
 
-        } catch (err) {
-            console.log(err);
-        }
-    };
+            } catch (err) {
+                console.log(err);
+            }
+        };
 
-    fetchAllCategories();
-}, []);
+        fetchAllCategories();
+    }, []);
 
 
     useEffect(() => {
@@ -129,9 +129,9 @@ function TransactionPage() {
 
     const downloadExcel = async () => {
         const res = await fetch(`${API_URL}/transaction/export`, {
-            
-                    withCredentials: true
-                
+
+            credentials: "include"
+
         });
 
 
